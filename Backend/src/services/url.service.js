@@ -30,6 +30,7 @@ async function createShortUrl(longUrl, expiresAt = null) {
 async function resolveShortUrl(shortCode) {
   try {
     const cacheKey = `short:url:${shortCode}`;
+    console.log("hai yaar");
 
     // 1️⃣ TRY REDIS FIRST (READ CACHE)
     if (redisClient.isReady) {

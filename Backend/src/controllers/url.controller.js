@@ -2,10 +2,10 @@ const urlService = require('../services/url.service');
 
 async function shorten(req, res) {
   try {
-    console.log('api hitted');
+  
     const { longUrl, expiresAt } = req.body;
     // console.log(longUrl);
-    console.log(expiresAt)
+   
     // console.log('1');
     if (!longUrl) {
       return res.status(400).json({ message: "longUrl is required" });
@@ -13,6 +13,7 @@ async function shorten(req, res) {
     // console.log('2');
     const shortCode = await urlService.createShortUrl(longUrl, expiresAt);
     // console.log('3');
+   
     res.status(201).json({
     shortUrl: `${req.protocol}://${req.get('host')}/u/${shortCode}`
     });

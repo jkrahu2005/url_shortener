@@ -1,31 +1,49 @@
-const mysql = require('mysql2');
+require("dotenv").config();
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
+const { Pool } = require("pg");
+
+let connectionString = process.env.DATABASE_URL;
+
+// Replace sslmode=require with sslmode=verify-full to avoid the pg warning
+if (connectionString && connectionString.includes("sslmode=require")) {
+  connectionString = connectionString.replace(
+    "sslmode=require",
+    "sslmode=verify-full"
+  );
+}
+
+const pool = new Pool({
+  connectionString,
+  ssl: {
+    rejectUnauthorized: false,
+  },
+  max: 10,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
 });
 
-// Promise-based pool
-const db = pool.promise();
+pool.on("error", (err) => {
+  console.error("❌ Unexpected PostgreSQL error:", err.message);
+});
 
-// 🔹 Explicit connect function (for server bootstrap)
 async function connect() {
   try {
-    await db.query('SELECT 1');
-    console.log('✅ MySQL connected successfully');
+    const client = await pool.connect();
+
+    const result = await client.query("SELECT NOW()");
+
+    console.log("✅ PostgreSQL Connected");
+    console.log("🕒 Server Time:", result.rows[0].now);
+
+    client.release();
   } catch (err) {
-    console.error('❌ MySQL connection failed');
+    console.error("❌ PostgreSQL Connection Failed");
     console.error(err.message);
-    throw err; // let server.js decide to exit
+    throw err;
   }
 }
 
 module.exports = {
-  db,
-  connect
+  db: pool,
+  connect,
 };

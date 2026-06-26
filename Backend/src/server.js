@@ -1,50 +1,58 @@
-require('dotenv').config();
+require("dotenv").config();
 
-const express = require('express');
-const cors = require('cors');
+const express = require("express");
+const cors = require("cors");
+
+const { connect: connectDB } = require("./utils/db");
+const redisClient = require("./utils/redisClient");
+const UrlRouter = require("./routes/url.routes");
+
 const app = express();
 
-const { connect: connectDB } = require('./utils/db');
-const redisClient = require('./utils/redisClient');
-const UrlRouter = require('./routes/url.routes');
-
-app.use(cors({
-  origin: 'http://localhost:5173',
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://url-shortener-wheat-two.vercel.app",
+    ],
+    credentials: true,
+  })
+);
 
 app.use(express.json());
-app.use('/',UrlRouter)
-app.use('/url', UrlRouter);
 
+app.use("/", UrlRouter);
+app.use("/url", UrlRouter);
 
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'OK' });
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "OK",
+    database: "PostgreSQL",
+  });
 });
 
 const PORT = process.env.PORT || 3000;
 
 async function startServer() {
   try {
-    // 1️⃣ Connect MySQL (MANDATORY)
+    // Connect PostgreSQL (Required)
     await connectDB();
 
-    // 2️⃣ Connect Redis (OPTIONAL)
+    // Connect Redis (Optional)
     try {
       await redisClient.connect();
-      console.log('✅ Redis connected');
+      console.log("✅ Redis connected");
     } catch (err) {
-      console.error('⚠️ Redis connection failed:', err.message);
-      console.log('⚠️ Continuing without Redis cache');
+      console.warn("⚠️ Redis connection failed:", err.message);
+      console.warn("⚠️ Continuing without Redis cache");
     }
 
-    // 3️⃣ Start server ONLY after DB is ready
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
-
   } catch (err) {
-    console.error('❌ Server startup aborted due to DB failure');
+    console.error("❌ Failed to start server");
+    console.error(err);
     process.exit(1);
   }
 }
