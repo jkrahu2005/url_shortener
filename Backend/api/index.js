@@ -13,7 +13,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://url-shortener-wheat-two.vercel.app",
+      "https://url-shortener-nine-blush.vercel.app",
     ],
     credentials: true,
   })
