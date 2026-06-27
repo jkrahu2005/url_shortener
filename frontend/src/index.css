@@ -1,2 +1,37 @@
 @import "tailwindcss";
 @plugin "daisyui";
+
+/* ---- Smooth theme transitions ---- */
+* {
+  transition-property: background-color, color, border-color, box-shadow, fill, stroke;
+  transition-duration: 0.3s;
+  transition-timing-function: ease;
+}
+
+/* ---- Base reset & DaisyUI integration ---- */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  /* DaisyUI's base background is applied via data-theme, 
+     but we set a fallback to prevent a white flash on load */
+  background-color: var(--fallback-b1, oklch(0.98 0.01 240));
+}
+
+/* Let the browser know we support light/dark */
+:root {
+  color-scheme: light dark;
+}
+
+/* Optional: DaisyUI's default themes already handle everything,
+   but you can override specific brand colors here if you like.
+   For example, to make the primary color slightly warmer:
+   
+   [data-theme="light"] {
+     --p: 220 70% 55%;
+   }
+   [data-theme="dark"] {
+     --p: 220 70% 65%;
+   }
+*/
